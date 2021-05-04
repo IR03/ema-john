@@ -13,12 +13,21 @@ import Review from './component/Review/Review';
 import Inventory from './component/Inventory/Inventory';
 import NotFound from './component/NotFound/NotFound';
 import ProductDetail from './component/ProductDetail/ProductDetail';
+import Shipment from './component/Shipment/Shipment';
+import Login from './component/Login/Login';
+import { createContext, useState } from 'react';
+import PrivateRoute from './component/PrivateRoute/PrivateRoute';
 
-function App() {
+export const UserContext = createContext();
+
+function App(props) {
+  const [loggedInUser, setLoggedInUser] =  useState({});
   return (
-    <div >
-      <Header></Header>
+    <UserContext.Provider value = {[loggedInUser, setLoggedInUser]} >
+      <h3>email: {loggedInUser.email}</h3>
+      
       <Router>
+        <Header></Header>
         <Switch>
           <Route path ="/shop">
             <Shop></Shop>
@@ -26,9 +35,15 @@ function App() {
           <Route path = "/review">
             <Review></Review>
           </Route>
-          <Router path = "/inventory">
+          <PrivateRoute path = "/inventory">
             <Inventory></Inventory>
-          </Router>
+          </PrivateRoute>
+          <Route path = "/login">
+            <Login></Login>
+          </Route>
+          <PrivateRoute path = "/shipment">
+            <Shipment></Shipment>
+          </PrivateRoute>
           <Router exact path = "/">
             <Shop></Shop>
           </Router>
@@ -43,7 +58,7 @@ function App() {
       
       
       {/* <Product></Product> */}
-    </div>
+    </UserContext.Provider>
   );
 }
 
