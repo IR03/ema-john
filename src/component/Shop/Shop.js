@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import fakeData from '../../fakeData';
 import { addToDatabaseCart, getDatabaseCart } from '../../utilities/databaseManager';
 import Cart from '../Cart/Cart';
 import Product from '../Product/Product';
@@ -7,21 +6,32 @@ import'./Shop.css'
 import { Link } from 'react-router-dom';
 
 const Shop = () => {
-    const first10 = fakeData.slice(0,10);
-    const [products, setProducts] = useState(first10);
+    // const first10 = fakeData.slice(0,10);
+    const [products, setProducts] = useState([]);
     const [cart , setCart] = useState([]);
+    // document.title = "Shop More";
     //same as review.js
+
+    useEffect(()=>{
+        fetch('https://rocky-depths-31427.herokuapp.com/products')
+        .then(res => res.json())
+        .then(data => setProducts(data))
+    },[])
+    
     useEffect(()=>{
         const saveCart =getDatabaseCart();
         const productKeys = Object.keys(saveCart);
 
-        const previousCart = productKeys.map(existingKey => {
-            const product = fakeData.find(pd => pd.key === existingKey);
-            product.quantity = saveCart[existingKey];
-            return product;
+        fetch('https://rocky-depths-31427.herokuapp.com/productsByKeys', {
+            method: 'POST',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            body: JSON.stringify(productKeys)
         })
-        setCart(previousCart);
-    },[])
+        .then(res => res.json())
+        .then(data => setCart(data))
+    }, [])
 
     //data passing on cart
     const handleAddProduct = (product) => {

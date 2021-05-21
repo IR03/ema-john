@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
     // const seller = props.product?.seller;
     // const price = props.product?.price;
     // const stock = props.product?.stock;
+    
     return (
         <div className="product">
             <div>
