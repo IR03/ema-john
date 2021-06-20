@@ -1,54 +1,71 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { UserContext } from '../../App';
 import { getDatabaseCart, processOrder } from '../../utilities/databaseManager';
+import ProcessPayment from '../ProcessPayment/ProcessPayment';
 import './Shipment.css'
 
 const Shipment = () => {
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
     const [loggedInUser, setLoggedInUser] = useContext(UserContext);
-    const onSubmit = data =>{
-        // console.log(data)
+    const [shippingData, setShippingData] = useState(null);
+
+    const onSubmit = data => {
+        setShippingData(data);
+    };
+    const handlePaymentSuccess = paymentId => {
         const saveCart = getDatabaseCart();
-        const orderDetails = {...loggedInUser, products: saveCart, shipment: data, orderTime: new Date()};
+        const orderDetails = { 
+            ...loggedInUser, 
+            products: saveCart, 
+            shipment: shippingData,
+            paymentId, 
+            orderTime: new Date() 
+        };
 
         fetch('https://rocky-depths-31427.herokuapp.com/addOrder', {
-            method : 'POST',
+            method: 'POST',
             headers: {
-                'Content-Type' : 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(orderDetails)
         })
-        .then(res => res.json())
-        .then(data => {
-            if(data){
-                processOrder();
-                alert('your order placed successfully');
-            }
-        })
-
-    };
+            .then(res => res.json())
+            .then(data => {
+                if (data) {
+                    processOrder();
+                    alert('your order placed successfully');
+                }
+            })
+    }
 
     console.log(watch("example")); // watch input value by passing the name of it
 
     return (
-        
-        <form className="ship-form" onSubmit={handleSubmit(onSubmit)}>
 
-            <input {...register("name", { required: true })} defaultValue={loggedInUser.name}  placeholder="Your Name"/>
-            {errors.name && <span className="error">Name is required</span>}
+        <div>
+            <div style={{ display: shippingData ? 'none' : 'block'}} className="col-md-6">
+                <form className="ship-form" onSubmit={handleSubmit(onSubmit)}>
 
-            <input {...register("email", { required: true })} defaultValue={loggedInUser.email} placeholder="Your Email" />
-            {errors.email && <span className="error">Email is required</span>}
+                    <input {...register("name", { required: true })} defaultValue={loggedInUser.name} placeholder="Your Name" />
+                    {errors.name && <span className="error">Name is required</span>}
 
-            <input {...register("address", { required: true })} placeholder="Your Address" />
-            {errors.address && <span className="error">Address is required</span>}
+                    <input {...register("email", { required: true })} defaultValue={loggedInUser.email} placeholder="Your Email" />
+                    {errors.email && <span className="error">Email is required</span>}
 
-            <input {...register("phone", { required: true })} placeholder="Your Phone Number" />
-            {errors.phone && <span className="error">Phone Number is required</span>}
+                    <input {...register("address", { required: true })} placeholder="Your Address" />
+                    {errors.address && <span className="error">Address is required</span>}
 
-            <input type="submit" />
-        </form>
+                    <input {...register("phone", { required: true })} placeholder="Your Phone Number" />
+                    {errors.phone && <span className="error">Phone Number is required</span>}
+
+                    <input type="submit" />
+                </form>
+            </div>
+            <div style={{ display: shippingData ? 'block' : 'none'}} className="col-md-6">
+                <ProcessPayment  handlePayment={handlePaymentSuccess}/>
+            </div>
+        </div>
     );
 };
 

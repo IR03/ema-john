@@ -9,14 +9,15 @@ const Shop = () => {
     // const first10 = fakeData.slice(0,10);
     const [products, setProducts] = useState([]);
     const [cart , setCart] = useState([]);
+    const [search, setSearch] = useState("");
     // document.title = "Shop More";
     //same as review.js
 
     useEffect(()=>{
-        fetch('https://rocky-depths-31427.herokuapp.com/products')
+        fetch('https://rocky-depths-31427.herokuapp.com/products?serach='+ search)
         .then(res => res.json())
         .then(data => setProducts(data))
-    },[])
+    },[search])
     
     useEffect(()=>{
         const saveCart =getDatabaseCart();
@@ -32,6 +33,11 @@ const Shop = () => {
         .then(res => res.json())
         .then(data => setCart(data))
     }, [])
+
+
+    const handleSearch = event => {
+        setSearch(event.target.value);
+    }
 
     //data passing on cart
     const handleAddProduct = (product) => {
@@ -55,6 +61,7 @@ const Shop = () => {
     return (
         <div className ="twin-container">
             <div className="product-container">
+                <input type="text" onBlur={handleSearch} className="product-search" />
                 {
                   products.map(product => <Product
                     key = {product.key}
